@@ -5,7 +5,7 @@ These are projects for CSCE 317, Computer Systems Engineering at the University 
 The Atmel Atmega328 was used for all labs in the course--its [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf) has more information on its specifications. In summary, it's:
 * an 8-bit microcontroller that uses a RISC architecture,
 * compatible with SPI, I2C, and USART,
-* using the AVR instruction set.
+* using the [AVR instruction set](https://gcc.gnu.org/wiki/avr-gcc).
 
 ## Credits
 This course was taught by Dr. Jason. D. Bakos in the Spring of 2020; the Teaching assistant was Charles Daniels.
