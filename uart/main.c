@@ -4,18 +4,26 @@
 #include <string.h>
 #include <util/delay.h>
 
+void init(void) {
+  // Sets PCO as an output.
+  DDRC |= (1 << 0);
+}
 
 int main(void) {
-	/* initialize PC0 as an output */
+  init();
+  /* while true ... */
+  while(1) {
+    PORTC |= 1;
+    _delay_ms(500);
+    PORTC &= ~(1 << 0);
+    _delay_ms(500);
+  }
+  /* sleep for 1/2 second */
 
-	/* while true ... */
+  /* set PC0 high */
 
-		/* sleep for 1/2 second */
+  /* sleep for 1/2 second */
 
-		/* set PC0 high */
-
-		/* sleep for 1/2 second */
-
-		/* set PC0 to low */
+  /* set PC0 to low */
 }
 
