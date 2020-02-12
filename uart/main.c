@@ -74,26 +74,63 @@ void uart_init(void) {
     printf("\n\nUART initialized (%i 8N1)\n", UART_BAUDRATE);
 }
 
-void init(void) {
+/**
+ * @breif Sets the appropriate input and output pins on the Atmega board.
+ */
+void inout_init(void) {
   // Sets PCO as an output.
   DDRC |= (1 << 0);
+
 }
 
 int main(void) {
-  init();
-  /* while true ... */
-  while(1) {
-    PORTC |= 1;
-    _delay_ms(500);
-    PORTC &= ~(1 << 0);
-    _delay_ms(500);
+  inout_init();
+  uart_init();
+
+  char buf[65];
+  printf("im ready>\n");
+  
+  // Two states are possible:
+  //   0 = LED isn't blinking.
+  //   1 = LED is blinking.  
+  int state = 0;
+ 
+  while(1) { 
+    scanf("%s", &buf);
+    // buf = uart_getchar();
+    // Check and set the current state.
+    if (strcmp(buf,"on") ==  0) {
+      printf("starting blinking\n");
+      // Update state.
+      state = 1;
+      // Clear buffer char array. 
+      memset(&buf[0], 0, sizeof(buf));   
+    } else if (strcmp(buf,"off") == 0) {
+      printf("stopped blinking\n");
+      // Update state.
+      state = 0;
+      // Clear buffer.
+      memset(&buf[0], 0, sizeof(buf));
+    } else if (strlen(buf) == 0) {
+      state = state; 
+    } else {
+      printf("Hello user! That command was wrong.\n");
+      memset(&buf[0], 0, sizeof(buf)); 
+    }
+    // Continute the current state if it is correct.
+    if (state == 0) { // No blink.
+      while (UCSR0A & (1 << RXC0) == 0) {
+        PORTC &= 0;
+      }
+    } else if (state == 1) { // Blink.
+      while (UCSR0A & (1 << RXC0) == 0) { // If this logic is 1, then a char in in buffer.
+        PORTC |= 1;
+        _delay_ms(500);
+        PORTC &= ~(1 << 0);
+        _delay_ms(500);
+      }
+    } else {
+      printf("Something is very wrong.");
+    }
   }
-  /* sleep for 1/2 second */
-
-  /* set PC0 high */
-
-  /* sleep for 1/2 second */
-
-  /* set PC0 to low */
 }
-
