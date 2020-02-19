@@ -37,12 +37,30 @@ char str2[] = "off";
  * @return
  */
 int uart_putchar(char c, FILE *stream) {
+	/*
         while(!(UCSR0A&(1<<UDRE0))){}; //wait while previous byte is completed
         if (c == '\n') {
                 uart_putchar('\r', stream);
         }
         loop_until_bit_is_set(UCSR0A, UDRE0);
         UDR0 = c;
+	*/
+	cli(); // Disable interupts during TX.
+	// Pull TX low to send sart bit
+	PORTD &= 0x00;
+	// Wait 56700^-1 s (A clock period)
+	_delay_us(17.63668);
+	for (int i = 0; i < 8; ++i) {
+	  if ((c << i ) & 0x1 == 1) {
+	    PORTD |= (1 << PORTD1);
+	  }
+	  else {
+	    PORTD &= ~(1 << PORTD1);
+	  }
+	}
+	// Pull TX high to send stop bit.
+	PORTD &= 0x01;	
+	sei();
         return 0;
 }
 
@@ -65,6 +83,7 @@ ISR (USART_RX_vect) {
 	buf[cursor] = UDR0;
 	buf[cursor+1] = '\0';
 	if (buf[cursor] == '\r' || buf[cursor] == '\n') {
+		// buf[cursor] = '\0'; 
 	  if (strncmp(buf,str1,2) ==  0) {
 	    //  printf("starting blinking\n");
 	    // Update state.
@@ -93,7 +112,7 @@ ISR (USART_RX_vect) {
 void init(void) {
         // initialize USART
         UBRR0=(((F_CPU/(UART_BAUDRATE*16UL)))-1); // set baud rate
-        UCSR0B|=(1<<TXEN0); //enable TX
+        // UCSR0B|=(1<<TXEN0); //enable TX; DISABLED to allow for hardware UART 
         UCSR0B|=(1<<RXEN0); //enable RX
 
         UCSR0C |= (1 << UCSZ01 ) | (1 << UCSZ00 ) ; // character size of 8
