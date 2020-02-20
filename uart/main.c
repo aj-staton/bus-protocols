@@ -17,6 +17,7 @@
 
 #define BUFSZ 64
 #define INTERVAL_MS 1000
+//#define TX_c PORTD2 // Using PortD, Pin 2 to send UART signals.
 
 char buf[BUFSZ+1];
 uint8_t cursor;
@@ -45,22 +46,33 @@ int uart_putchar(char c, FILE *stream) {
         loop_until_bit_is_set(UCSR0A, UDRE0);
         UDR0 = c;
 	*/
+	
 	cli(); // Disable interupts during TX.
 	// Pull TX low to send sart bit
-	PORTD &= 0x00;
+	PORTD &= ~(1 << PORTD1);
 	// Wait 56700^-1 s (A clock period)
 	_delay_us(17.63668);
-	for (int i = 0; i < 8; ++i) {
+	for (unsigned short i = 0; i < 8; ++i) {
+	  // High Bit Case
 	  if ((c << i ) & 0x1 == 1) {
 	    PORTD |= (1 << PORTD1);
-	  }
+	  } // Low Bit Case
 	  else {
 	    PORTD &= ~(1 << PORTD1);
 	  }
+   	  _delay_us(17.63668);
 	}
 	// Pull TX high to send stop bit.
-	PORTD &= 0x01;	
+	PORTD |= (1 << PORTD1);
+	_delay_us(17.63668);
+
+	/* ERROR CHECK: Receive Complete (RXCn) Flag indicates if there are
+	unread data present in the receive buffer. High indicates unread data.
+	I am outputing this to an LED 
+	PORTD |= ((UCSRnA & (1 << RXCn)) << PORTD7);
+	*/
 	sei();
+	
         return 0;
 }
 
@@ -134,7 +146,7 @@ void init(void) {
 
 int main(void) {
 	init();
-	printf("Ready> \n");
+	printf(NULL, "Ready> \n");
 	while (1) {
 		//printf("cursor=%3u buf='%s'\n", cursor, buf);
 		if (state == 0) {
