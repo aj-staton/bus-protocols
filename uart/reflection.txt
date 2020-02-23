@@ -1,8 +1,56 @@
-Please edit this file to include your responses to the reflection questions
-below.
+Written by: Robert Carff and Austin Staton
+Date: Feb 23, 2020
 
 ==== QUESTION 1 ===============================================================
+Q: A fellow CSCE317 student says they are pretty sure they have implemented 
+Part B correctly, but their terminal just shows random junk. Speculate on the
+cause of this problem.
+
+A: Random junk on the terminal would most likely be due to the student mis-
+understanding the use of strings in C. 
+===============================================================================
+
 
 ==== QUESTION 2 ===============================================================
+Q: How did you choose to solve the problem in Part C of managing two separate
+tasks at the same time? Why did you select this approach?
+
+A: Part C of this lab was an exercise in using the UART hardware on the board,
+while also controlling an LED through a GPIO pin. If either of these two were
+handled incorrectly, the other would be 'blocked' (i.e. -- stopped, or not
+executing concurrently. Writing software that allowed for blocking took a min-
+ute amount of time. Most of the time on the lab was dedicated to learning how
+to create this non-blocking functionality.
+   Our group attempted many different solutions to this problem. Our initial
+thought was to implement threading; however, this is a resource-strapped micro-
+controller without a convienient pthread.h library to call. We did not want to
+over-complicate the problem. Next, we tried the recommended static scheduling
+approach. This proved to provide outputting errors, as we later (after
+submission) realized we were not handling the standard C library's string comp-
+arison function correctly with null terminators and new line characters.
+   Finally, our group attempted to use AVR's interrupt handlers. We first tried
+to handle the blinking of the LED in the interrupt handler. This attempt was
+thwarted by the blocking nature of the 'readline' function given to the class.
+When readline was called in the main loop, all execution was busy waiting for
+its exepcted carriage return. So, we flipped the responsibilites in the inter-
+rupts. Meaning, the UART input vector triggered the interrupts, while the LED's
+blinking was handled in the background. We chose this implementation because it
+allowed for an easy checking of string equality and allowed global variables to
+pass this to the background LED state.
+===============================================================================
 
 ==== QUESTION 3 ===============================================================
+Q: Suppose you were tasked with implementing a new feature in your project
+where a user could also enter a command set X with X being a number of milli-
+seconds specifying the total period of the LED blink cycle. In other words,
+when the LED is blinking, it should stay on for 2 X ms, rather than a half
+second. Briefly describe how you would implement this feature.
+
+A: The main addition to our group's structure to implement this additional
+command is a global integer variable representing this factor to the period. In
+our structure with interrupts handling the user input and the led blinking,
+this would be modified by the interrupts and used by the background LED.
+   If the command entered was 'set 3', this would be parsed and verified by the
+interrupt handling UART communication. The factor would then by used with the
+period of the 'delay' function in the LED's blinking behavior.   
+===============================================================================
