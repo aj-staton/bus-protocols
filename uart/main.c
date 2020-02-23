@@ -17,6 +17,7 @@
 
 #define BUFSZ 64
 #define INTERVAL_MS 1000
+//#define TX_c PORTD2 // Using PortD, Pin 2 to send UART signals.
 
 char buf[BUFSZ+1];
 uint8_t cursor;
@@ -37,12 +38,41 @@ char str2[] = "off";
  * @return
  */
 int uart_putchar(char c, FILE *stream) {
+	/*
         while(!(UCSR0A&(1<<UDRE0))){}; //wait while previous byte is completed
         if (c == '\n') {
                 uart_putchar('\r', stream);
         }
         loop_until_bit_is_set(UCSR0A, UDRE0);
         UDR0 = c;
+	*/
+	
+	cli(); // Disable interupts during TX.
+	// Pull TX low to send sart bit
+	PORTD &= ~(1 << PORTD1);
+	// Wait 56700^-1 s (A clock period)
+	_delay_us(17.63668);
+	for (unsigned short i = 0; i < 8; ++i) {
+	  // High Bit Case
+	  if ((c << i ) & 0x1 == 1) {
+	    PORTD |= (1 << PORTD1);
+	  } // Low Bit Case
+	  else {
+	    PORTD &= ~(1 << PORTD1);
+	  }
+   	  _delay_us(17.63668);
+	}
+	// Pull TX high to send stop bit.
+	PORTD |= (1 << PORTD1);
+	_delay_us(17.63668);
+
+	/* ERROR CHECK: Receive Complete (RXCn) Flag indicates if there are
+	unread data present in the receive buffer. High indicates unread data.
+	I am outputing this to an LED 
+	PORTD |= ((UCSRnA & (1 << RXCn)) << PORTD7);
+	*/
+	sei();
+	
         return 0;
 }
 
@@ -65,6 +95,7 @@ ISR (USART_RX_vect) {
 	buf[cursor] = UDR0;
 	buf[cursor+1] = '\0';
 	if (buf[cursor] == '\r' || buf[cursor] == '\n') {
+		// buf[cursor] = '\0'; 
 	  if (strncmp(buf,str1,2) ==  0) {
 	    //  printf("starting blinking\n");
 	    // Update state.
@@ -93,7 +124,7 @@ ISR (USART_RX_vect) {
 void init(void) {
         // initialize USART
         UBRR0=(((F_CPU/(UART_BAUDRATE*16UL)))-1); // set baud rate
-        UCSR0B|=(1<<TXEN0); //enable TX
+        // UCSR0B|=(1<<TXEN0); //enable TX; DISABLED to allow for hardware UART 
         UCSR0B|=(1<<RXEN0); //enable RX
 
         UCSR0C |= (1 << UCSZ01 ) | (1 << UCSZ00 ) ; // character size of 8
@@ -115,7 +146,7 @@ void init(void) {
 
 int main(void) {
 	init();
-	printf("Ready> \n");
+	printf(NULL, "Ready> \n");
 	while (1) {
 		//printf("cursor=%3u buf='%s'\n", cursor, buf);
 		if (state == 0) {
