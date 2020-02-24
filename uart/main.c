@@ -1,11 +1,14 @@
 /* Copyright 2020 Charles Daniels, Jason Bakos, Philip Conrad */
 
-/* Used by Robert Carff and Austin Staton for Part C of Lab 1 in CSCE 317.
- */
+/* Used by Robert Carff and Austin Staton for Part C of Lab 1 in CSCE 317. */
 
 /* Demonstration of asynchronous UART receive. Maintains a ring buffer of
  * data read in by the UART interrupt, and displays it's contents from a
- * foreground loop each interval. */
+ * foreground loop each interval. 
+ *
+ * NOTE: The bit-banging of UART's software implementation requires a baud rate
+ * of 9600 bps. 57600 bps is too high and results in bit skew. 
+ */
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -28,15 +31,17 @@ char str1[] = "on";
 char str2[] = "off";
 
 /**
- * @brief output one character via UART, on UART0
- *
+ * @brief output one character via UART, on UART0. UART uses a LOW start bit,
+ *        eight data bits, and a HIGH stop bit. 
+ * 	  
  * @param c the character
  * @param stream file handle, this is for compatibility
  *
  * @return
  */
 int uart_putchar(char c, FILE *stream) {
-	/*
+	/* If using the UART hardware, uncomment this chunk.
+
         while(!(UCSR0A&(1<<UDRE0))){}; //wait while previous byte is completed
         if (c == '\n') {
                 uart_putchar('\r', stream);
@@ -44,48 +49,27 @@ int uart_putchar(char c, FILE *stream) {
         loop_until_bit_is_set(UCSR0A, UDRE0);
         UDR0 = c;
 	*/
- 		
-	cli(); // Disable interupts during TX.
+	cli(); // Disable interupts during transmission.
 	// Pull TX low to send sart bit
 	PORTD &= ~(1 << PORTD1);
-	// Wait 56700^-1 s (A clock period)
-	_delay_us(17.36111);
-		
-	for (int i = 7; i >= 0; i--) {
+	// Wait 9600^-1 s (A clock period)
+	_delay_us(104UL);
+	for (int i = 0; i < 8; i++) {
 	  // High Bit Case
-	  if ((c >> i) & 0x01 == 1) {
+	  if (((c >> i) & 0x01) != 0) {
 	    PORTD |= (1 << PORTD1);
 	  } // Low Bit Case
 	  else {
-	    PORTD &= (0 << PORTD1);
+	    /* PORTD &= (0 << PORTD1); */
+	    PORTD &= ~(1 << PORTD1);
 	  }
-	  _delay_us(17.36111);
+	  _delay_us(104UL);
 	} 
-
-/*
-	THIS SENDS CHAR R
-	PORTD = PORTD & (0 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD | (1 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD & (0 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD & (0 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD | (1 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD & (0 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD | (1 << PORTD1);
-	_delay_us(17.36111);
-	PORTD = PORTD & (0 << PORTD1);
-	_delay_us(17.36111);
-*/
 	// Pull TX high to send stop bit.
 	PORTD = PORTD | (1 << PORTD1);
-	_delay_us(17.3611);
-	sei();
-
+	_delay_us(104UL);
+	_delay_us(104UL); // Extra delay for safety.
+	sei(); // Re-enable global interrupts.
         return 0;
 }
 
@@ -108,7 +92,6 @@ ISR (USART_RX_vect) {
 	buf[cursor] = UDR0;
 	buf[cursor+1] = '\0';
 	if (buf[cursor] == '\r' || buf[cursor] == '\n') {
-		// buf[cursor] = '\0'; 
 	  if (strncmp(buf,str1,2) ==  0) {
 	    //  printf("starting blinking\n");
 	    // Update state.
@@ -138,16 +121,20 @@ void init(void) {
         // initialize USART
         UBRR0=(((F_CPU/(UART_BAUDRATE*16UL)))-1); // set baud rate
         // UCSR0B|=(1<<TXEN0); //enable TX; DISABLED to allow for hardware UART 
-        UCSR0B|=(1<<RXEN0); //enable RX
+        UCSR0B|=(1<<RXEN0); //enable RX 
 
         UCSR0C |= (1 << UCSZ01 ) | (1 << UCSZ00 ) ; // character size of 8
         UCSR0C &= ~(1 << USBS0 ) ; // 1 stop bit
         UCSR0C &= ~( (1 << UPM01 ) | (1 << UPM00 ) ); // disable parity
         UCSR0B |= (1<<RXCIE0); // enable RX interrupt
 
-	// Set Port D's data direction register to be PORTD1.
-	// Write 1 since it'll be output.
+	// Set Port D's data direction register to be PORTD1 (our TX pin).
+	// Write 1 since it'll be used as output.
 	DDRD = DDRD | (1 << PORTD1);
+	// The first byte sent was always incorrect. This delay was added to
+	// prevent any jumbling of bits.
+	PORTD |= (1 << PORTD1);
+	_delay_us(1000);
 
         // initialize file descriptors
         fdevopen(uart_putchar, NULL);
@@ -165,13 +152,9 @@ int main(void) {
 	init();
 	printf("Ready>\n");
 	while (1) {
-		if (state == 0) {
-		  PORTC &= 0;
-		} else if (state == 1) {
-		  PORTC |= 1;
-        	  _delay_ms(500);
-                  PORTC &= ~(1 << 0);
-        	  _delay_ms(500);
-		}
-	}
+	  PORTD |= (1 << PORTD1);
+	  _delay_us(10);
+	  PORTD &= ~(1 << PORTD1);
+	  _delay_us(10);
+	} 
 }
