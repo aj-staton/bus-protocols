@@ -96,18 +96,20 @@ ISR (USART_RX_vect) {
 	    //  printf("starting blinking\n");
 	    // Update state.
 	    state = 1;
+	    printf("\n");
 	  }
 	  else if (strncmp(buf,str2,3) == 0) {
 	    // printf("stopped blinking\n");
 	    // Update state.
 	    state = 0;
+	    printf("\n");
 	  }
 	  else {
 	    printf("Invalid command, not changing state\n");
 	  }
 	  buf[0] = '\0';
 	  cursor = 0;
-	  printf("Ready>\n");
+	  printf("Ready>");
 	  return;
 	}
 	/* guarantee null termination */
@@ -150,11 +152,15 @@ void init(void) {
 
 int main(void) {
 	init();
-	printf("Ready>\n");
+	printf("Ready>");
 	while (1) {
-	  PORTD |= (1 << PORTD1);
-	  _delay_us(10);
-	  PORTD &= ~(1 << PORTD1);
-	  _delay_us(10);
+	  if (state == 0) {
+	    PORTC &= 0;
+	  } else {
+	    PORTC |= 1;
+	    _delay_ms(500);
+            PORTC &= ~(1 << 0);
+            _delay_ms(500);
+	  }
 	} 
 }
