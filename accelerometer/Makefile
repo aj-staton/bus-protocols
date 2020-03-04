@@ -8,7 +8,7 @@ UART_BAUDRATE_DEF=-DUART_BAUDRATE=$(UART_BAUDRATE)
 DEFS=$(F_CPU_DEF) $(UART_BAUDRATE_DEF)
 
 CC = avr-gcc
-CFLAGS = $(OPTIMIZATION) -mmcu=$(MCUNAME) $(DEFS) -std=c99
+CFLAGS = $(OPTIMIZATION) -mmcu=$(MCUNAME) $(DEFS) -std=c99 -Wall -Wextra
 
 # username to pack under
 USER?=$(shell whoami)
@@ -52,7 +52,7 @@ main.hex: main.elf
 # flash the AVR with the generate hex file
 burn: main.hex
 	@printf "Burn Baby Burn...\n"
-	avrdude -p $(PARTNO) -c $(AVRDUDE_PROGRAMMER) -U flash:w:main.hex:i
+	avrdude -p $(PARTNO) -c $(AVRDUDE_PROGRAMMER) -U flash:w:main.hex:i -B1
 
 wiringtest:
 	avrdude -p $(PARTNO) -c $(AVRDUDE_PROGRAMMER) -U flash:w:wiringtest.dat:i
