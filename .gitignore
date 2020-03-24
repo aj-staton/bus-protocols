@@ -1,0 +1,9 @@
+# Dependancy Files
+*.d
+# Complied Object Files
+*.o
+# Statically Linked Libaries
+*.la
+# Input/Output datafiles.
+*.out
+*.in
