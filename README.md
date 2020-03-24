@@ -1,22 +1,14 @@
-# Computer Systems Engineering
-These are projects for CSCE 317, Computer Systems Engineering at the University of South Carolina Columbia. The course is lab-based around embedded systems and thier application and development. All code in the course was bare metal code. 
+# MicroControllers
+These are projects for CSCE 317, Computer Systems Engineering at the University of South Carolina, Columbia. The course is lab-based around embedded systems and thier communication protocols.
 
-### Execution
-Download the repository, connect the board to a the compuer through its bridge, then run the following commands:
-```bash
-$ cd uart/
-$ make clean && make burn
-```
-To interface with the board, run the below in a separate terminal:
-```bash
-$ picocom -b 57600 /dev/ttyUSB0 
-``` 
+During my time in this course, the unfortunate events of COVID-19 occured globally. This forced instruction to be moved online. 
+The [UART](#UART) project was completed in-person, completed with the Atmel Atmega 328p. The other projects, in the "virtual classroom," were written locally and them simulated/tested with SystemVerilog. 
 
-#### The Hardware
-The Atmel Atmega328 was used for all labs in the course--its [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/Atmel-7810-Automotive-Microcontrollers-ATmega328P_Datasheet.pdf) has more information on its specifications. In summary, it's:
-* an 8-bit microcontroller that uses a RISC architecture,
-* compatible with SPI, I2C, and USART,
-* using the [AVR instruction set](https://gcc.gnu.org/wiki/avr-gcc).
+## UART
+Wrote a software-defined implementation of UART communication using GPIO pins on the AVR-based Atmel Atmega 328p microcontroller.
 
-## Credits
-This course was taught by Dr. Jason. D. Bakos in the Spring of 2020; the Teaching assistant was Charles Daniels.
+## SPI
+Wrote a software-defined implementation of SPI comunication which was tested by simulation in HDL.
+
+### Credits
+This course was taught by Dr. Jason. D. Bakos in the Spring of 2020; the Teaching Assistant was Charles Daniels.
