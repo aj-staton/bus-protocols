@@ -3,3 +3,4 @@ simulation
 obj_dir/*
 simulation.log
 filtered.vcd
+handout
