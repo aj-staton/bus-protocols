@@ -3,7 +3,7 @@ Universal asynchronous reciever-transmitter communication, or 'UART' (sometimes 
 
 ## Project Deliverables
 There were four deliverables produced in this sequence of projects. They were:
- 1. A blinking LED controlled with GPIO pins---the embedded "Hello World"
+ 1. A blinking LED controlled with GPIO pins: the embedded "Hello World."
  2. Using the dedicated UART hardware to write "Hello World" to the serial connection.
  3. Again, using the dedicated UART hardware to read and write variable data across the serial connection.
  4. Removing the hardware support from Part 3. So, a GPIO pin was used to create a manual, software-defined implemtation of the UART communication channel. In a "real-world" scenario, some chips (e.g., this one) have only one piece of dedicated UART hardware. Or, what if all communication hardware on the chip is being used for peripherals? In either of these cases, it's possible that a debugging output might be necessary for development purposes;but, isn't available.The easiest fix is to use a software-defined implementation of the needed communication.
