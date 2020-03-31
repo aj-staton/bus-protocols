@@ -1,6 +1,5 @@
 # Serial Peripheral Interface
-This is a project is a result of COVID-19. The project uses 
-[Verilator](https://www.veripool.org/wiki/verilator) to simulate the written
+The project uses [Verilator](https://www.veripool.org/wiki/verilator) to simulate the written
 code in a Verilog "peripheral". Since Verilartor is build on C++, we must use a .cpp file for
 its input; however, the goal is to use as much C notation and practices as
 possible.
