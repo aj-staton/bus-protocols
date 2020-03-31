@@ -1,8 +1,7 @@
 # Serial Peripheral Interface
 The project uses [Verilator](https://www.veripool.org/wiki/verilator) to simulate the written
-code in a Verilog "peripheral". Since Verilartor is build on C++, we must use a .cpp file for
-its input; however, the goal is to use as much C notation and practices as
-possible.
+code in a Verilog "peripheral". Since Verilartor is build on C++, we must use a `*.cpp` file for
+its input; however, the goal is to use as much C notation and practices as possible.
 
 A bit-banged implementation of SPI communication was implemented as the main
 functionality of the project. It is found in `main.cpp`.
