@@ -15,9 +15,9 @@ filtered.vcd: trace.vcd
 
 decode: filtered.vcd
 	@echo "transmitted from master to slave... "
-	sigrok-cli -I vcd -i ./filtered.vcd -A spi=mosi-data -P spi:cpha=1:cpol=1:bitorder=msb-first:miso=miso:mosi=mosi:cs=cs:clk=sck
+	./sigrok-cli -I vcd -i ./filtered.vcd -A spi=mosi-data -P spi:cpha=1:cpol=1:bitorder=msb-first:miso=miso:mosi=mosi:cs=cs:clk=sck
 	@echo "transmitted from slave to master... "
-	sigrok-cli -I vcd -i ./filtered.vcd -A spi=miso-data -P spi:cpha=1:cpol=1:bitorder=msb-first:miso=miso:mosi=mosi:cs=cs:clk=sck
+	./sigrok-cli -I vcd -i ./filtered.vcd -A spi=miso-data -P spi:cpha=1:cpol=1:bitorder=msb-first:miso=miso:mosi=mosi:cs=cs:clk=sck
 .PHONY: decode
 
 waves: trace.vcd
