@@ -57,8 +57,8 @@ uint8_t spi_read(simulation_state* s, uint8_t addr) {
   for (int i = 7; i >= 0; --i) {
     // Make sure clock is at zero for 8 cycles.
     write_io(s, IO_SCK, 0);
-    // Write to MOSI:
-    write_io(s, IO_MOSI, 1); // Dummy bits.
+    // Write a Dummy Value to MOSI:
+    write_io(s, IO_MOSI, 1);
     delay_cycles(s, SPI_CLK_RATIO/2);
     // Make sure clock is at one for 8 cycles.
     // Read MISO:
