@@ -69,8 +69,6 @@ uint8_t spi_read(simulation_state* s, uint8_t addr) {
    }
    delay_cycles(s, 1);
  }
- write_io(s, IO_MOSI, 1);
- delay_cycles(s, 1);
  // The Read
  for (int i = 15; i >= 0; --i) {
    write_io(s, IO_CS, 0);
@@ -82,7 +80,10 @@ uint8_t spi_read(simulation_state* s, uint8_t addr) {
    }
    delay_cycles(s, 1);
  }
+ // Pull CS high--transaction ended.
+ write_io(s, IO_CS, 1);
  return data;
+
 }
 /*
  * @breif is_high() will get determine if the Nth bit of
