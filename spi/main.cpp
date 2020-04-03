@@ -7,12 +7,6 @@
 /* number of SPI SCK cycles per system clock cycle */
 #define SPI_CLK_RATIO 16
 
-typedef enum {
-  TRUE,
-  FALSE
-} bool_t;
-
-bool_t is_high(uint8_t byte, uint8_t N);
 uint8_t spi_read(simulation_state* s, uint8_t addr);
 
 int main(int argc, char **argv) {
@@ -75,16 +69,4 @@ uint8_t spi_read(simulation_state* s, uint8_t addr) {
   // Pull CS high--transaction ended.
   write_io(s, IO_CS, 1);
   return data;
-}
-
-/*
- * @breif is_high() will get determine if the Nth bit of
- *   byte is 1 or 0. N is wrt big-endian order.
- */
-bool_t is_high(uint8_t byte, uint8_t N) {
- if ((byte >> N) & 0x1) {
-   return TRUE;
- } else {
-   return FALSE;
- }
 }
