@@ -21,8 +21,16 @@ uint8_t spi_read(simulation_state* s, uint8_t addr);
 int main(int argc, char **argv) {
   simulation_state* s = initialize_simulation(argc, argv);
   
-  //printf("WHO_AM_I returned: %hhu\n", spi_read(s, 0x0F));
-  printf("DATA returned: %hu\n", spi_read(s, 0x10));
+  uint8_t whoami = spi_read(s, 0x0F); 
+  if (whoami == 0x34) {
+    printf("WHO_AM_I read correctly.\n");
+    for (int i = 0; i < 4; ++i){
+       uint8_t data = spi_read(s, 0x10);
+       printf("DATA read %d value is: %hhu\n", i, data);
+    }
+  } else {
+    printf("Error: WHO_AM_I was not read correctly.\n");
+  }
 }
 
 /*
@@ -46,7 +54,7 @@ uint8_t spi_read(simulation_state* s, uint8_t addr) {
 
  /* Transactions:  *  First: Write the address to the sensor on MOSI.
   *  Second: Read the data from the sensor on MISO. */
- 
+ // The Write
  for (int i = 15; i >= 0; --i) {
    write_io(s, IO_CS, 0);
    if (i % 2 == 1) { // This is NOT active
@@ -61,12 +69,16 @@ uint8_t spi_read(simulation_state* s, uint8_t addr) {
    }
    delay_cycles(s, 1);
  }
- for (int i = 0; i < 32; ++i) {
+ write_io(s, IO_MOSI, 1);
+ delay_cycles(s, 1);
+ // The Read
+ for (int i = 15; i >= 0; --i) {
    write_io(s, IO_CS, 0);
    if (i % 2 == 1) { // This is NOT active
      write_io(s, IO_SCK, 1);
    } else {
      write_io(s, IO_SCK, 0);
+     data |= (read_io(s, IO_MISO) << (i/2+1));
    }
    delay_cycles(s, 1);
  }
