@@ -7,7 +7,7 @@ A bit-banged implementation of SPI communication was implemented as the main
 functionality of the project. It is found in `main.cpp`.
 
 ## Dependancies
-To resolve them all (assuming you're using the aptitude package manager):
+To resolve them all (assuming you're using the APT package manager):
 ```bash
 $ sudo apt-get install verilator gtkwave build-essential sigrok-cli
 ```
