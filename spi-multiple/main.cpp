@@ -1,4 +1,5 @@
-/* Copyright 2020 Jason Bakos, Philip Conrad, Charles Daniels 
+/*
+ * Copyright 2020 Jason Bakos, Philip Conrad, Charles Daniels 
  * Used and modified by Austin Staton for CSCE317, Project lab_virtspi_multi
  */
 
@@ -22,6 +23,13 @@
 #define F_PAGESEL 0x10
 #define F_OFFSET  0x11
 #define F_DATA    0x12
+
+/* What the offsets in Flash Mem correspond to. */ 
+#define IS_SENSOR_DATA 0x00
+#define SENSOR_DATA_SIGNAL 0x11 // If this is in offset 0 of a page, it has data
+#define PAGE_NUMBER 0x01
+#define NUM_BYTES 0x02 // Stores the total number of bytes in the page.
+#define BEGIN_DATA 0x03 // The first byte of actual sensor data in the page.
 
 uint8_t _buffer[129];
 uint8_t _datacnt = 0;
@@ -48,20 +56,21 @@ int main(int argc, char **argv) {
   while (active_page < total_pages) {
     /* The READ from the SENSOR */
     spi_read_streaming(s);
-    if (DEBUG) printf("Sensor Data retrieved.\n");
+    delay_cycles(s, SPI_CLK_RATIO); 
     /* The WRITE to FLASH */
     // Make a Page's header. 
     spi_write(s, F_PAGESEL, active_page, FLASH);
-    spi_write(s, F_OFFSET, 0, FLASH);
-    spi_write(s, F_DATA, 0x11, FLASH); // 0x11 signals that a page holds sensor
-    spi_write(s, F_OFFSET, 1, FLASH);
+    spi_write(s, F_OFFSET, IS_SENSOR_DATA, FLASH);
+    spi_write(s, F_DATA, SENSOR_DATA_SIGNAL, FLASH);
+    spi_write(s, F_OFFSET, PAGE_NUMBER, FLASH);
     spi_write(s, F_DATA, active_page, FLASH);
-    spi_write(s, F_OFFSET, 2, FLASH);
+    spi_write(s, F_OFFSET, NUM_BYTES, FLASH);
     spi_write(s, F_DATA, _datacnt, FLASH);
     // Write the Actual data.
-    for (int i = 0; i < _datacnt-1; ++i) {
+    for (int i = 0; i < _datacnt; ++i) { // This was (_datacnt-1). Was one off.
       spi_write(s, F_OFFSET, 3+i, FLASH);
       spi_write(s, F_DATA, _buffer[i], FLASH);
+      delay_cycles(s, SPI_CLK_RATIO/4);
     }
     active_page += 1;
   }
@@ -75,7 +84,7 @@ int main(int argc, char **argv) {
  *  
  *  @params: s    -- the hardware simulation on Verilator.
  *           addr -- the address to read from the peripheral.
-             CS   -- the chip to read from.
+ *           CS   -- the chip to read from.
  */
 uint8_t spi_read_single(simulation_state* s, uint8_t addr, simulation_io CS) {
   uint8_t data = 0x00;
@@ -122,7 +131,8 @@ uint8_t spi_read_single(simulation_state* s, uint8_t addr, simulation_io CS) {
  * difference is that the MISO wil return a variable amount of 8-bit 
  * sensor readings continuously.
  * 
- * Note: this function is only applicable to the SENSOR.
+ * Note: this function is only applicable to the SENSOR. It is more of a
+ * sub-routine than it is a function.
  * 
  * @params: s -- the hardware simulation in Verilatory
  */
@@ -133,7 +143,7 @@ void spi_read_streaming(simulation_state* s) {
    * sensor is ready to write values. */
   while (_datacnt == 0) {
     if (DEBUG) printf("Polled\n");write_io(s, IO_SCK, 1);
-    delay_cycles(s, SPI_CLK_RATIO/2);
+    delay_cycles(s, SPI_CLK_RATIO/4);
     _datacnt = spi_read_single(s, S_DATACNT, SENSOR);
   }
 
@@ -172,9 +182,7 @@ void spi_read_streaming(simulation_state* s) {
       delay_cycles(s, SPI_CLK_RATIO/2);
     }
     _buffer[i] = tmp;
-    if (DEBUG) printf("    The value of  %hhu  is going to index %d\n", tmp, i);
   } 
-
   // Pull CS High at the end.
   write_io(s, SENSOR, 1);
   delay_cycles(s, SPI_CLK_RATIO/2);
@@ -197,7 +205,7 @@ void spi_write(simulation_state *s, uint8_t addr, uint8_t data,
   addr = (0x80 | addr); // First bit is always 1.
   write_io(s, IO_SCK, 1);
   delay_cycles(s, 1);
-  // Pull CS Low to signal transaction.
+  // Pull CS Low to signal transaction
   write_io(s, CS, 0);
   delay_cycles(s, SPI_CLK_RATIO);
   /* Transactions:  
@@ -213,7 +221,7 @@ void spi_write(simulation_state *s, uint8_t addr, uint8_t data,
     write_io(s, IO_SCK, 1);
     delay_cycles(s, SPI_CLK_RATIO/2);
   }
-  if (DEBUG) printf("Writing  %hhu  to store on flash.", data);
+  if (DEBUG) printf("     Writing  %hhu  to store on flash.\n", data);
   for (int i = 7; i >= 0; --i) {
     // Make sure clock is at zero for 8 cycles.
     write_io(s, IO_SCK, 0);

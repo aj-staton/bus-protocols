@@ -1,4 +1,5 @@
 # Copyright 2020 Jason Bakos, Philip Conrad, Charles Daniels
+# Used and Modified by Austin Staton
 
 VERILATOR=verilator
 VERILATOR_ROOT ?= $(shell bash -c 'verilator -V|grep VERILATOR_ROOT | head -1 | sed -e "s/^.*=\s*//"')
@@ -50,7 +51,7 @@ obj_dir/Vtop.cpp: top.sv SPI_Slave.v vd002.sv vd003.sv
 	$(VERILATOR) --trace -Wall -cc top.sv
 
 clean:
-	rm -rf obj_dir simulation simulation.log trace.vcd filtered.vcd flashio.vcd
+	rm -rf obj_dir simulation simulation.log *.out trace.vcd filtered.vcd flashio.vcd
 .PHONY: clean
 
 sigrok:
