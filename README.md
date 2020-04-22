@@ -15,7 +15,7 @@ Wrote a software-defined implementation of SPI comunication which was tested by 
 
 ## SPI (Multiple)
 This project is similar to the original SPI project. A bit-banged SPI transaction was still used, _but_ with two caveats:
-  * An Streaming SPI transaction was added. This allowed for 1-128 bits to be read in a single transaction.
+  * A Streaming SPI transaction was added. This allowed for 1-128 bits to be read in a single transaction.
   * Unlike the other project, a 'write' SPI mode was needed.
 The goal was to read sensor data and write it to off-chip flash memory.
 
