@@ -14,7 +14,7 @@ Communicated via SPI between the 328p and an LIS3DH accelerometer. This project 
 Wrote a software-defined implementation of SPI comunication which was tested by simulations in Verilator that created `*.vcd` (value change dump) files. These files were then sent to Sigrok to read.
 
 ## SPI (Multiple)
-This project is similar to the original SPI project. A bit-banged SPI transaction was used, but with two caveats:
+This project is similar to the original SPI project. A bit-banged SPI transaction was still used, _but_ with two caveats:
   * An Streaming SPI transaction was added. This allowed for 1-128 bits to be read in a single transaction.
   * Unlike the other project, a 'write' SPI mode was needed.
 The goal was to read sensor data and write it to off-chip flash memory.
