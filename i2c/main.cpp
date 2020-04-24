@@ -1,8 +1,6 @@
 /* Copyright 2020 Jason Bakos, Philip Conrad, Charles Daniels */
 
-/* Used and modified by Doofus McDooferson for CSCE317, Project lab_virti2csingle
- *
- * HINT: your name is not "Doofus McDooferson"
+/* Used and modified by Austin Staton for CSCE317, Project lab_virti2csingle
  */
 
 #include "support.h"
@@ -81,28 +79,52 @@ typedef struct {
  *   NOTE: this function must check if the requested address matches
  *   the "assigned address" of the peripheral calling this function
  *   (i.e. the address of your code).  This value should be 0x7A.
- * I2C_TRANSACT::cycle_width - you do not need to set this value.
+ * I2C__TRANSACT::cycle_width - you do not need to set this value.
  * I2C_TRANSACT::readwrite - you only need to implement slave write
  *   operations for this lab, so you do not need to write this value
  * I2C_TRANSACT::data - the written data should be placed in here.
  */
 int slave_i2c(simulation_state *s,I2C_TRANSACT *mytrans) {
-	// start
+	/* Address Phase */
+  WAIT_FOR_START_BIT(s);
+	// Get Address-- 7 bits in I2C
+  int addr = 0;
+  for (int i = 6; i >= 0; --i) {
+    WAIT_FOR_RISING_SCL(s);
+    addr |= (read_io(s, IO_SDA) << i);
+  }
+  // Get R/W Bit
+  WAIT_FOR_RISING_SCL(s);
+	// Update the transaction.
+  mytrans->readwrite = (read_io(s, IO_SDA));
+  mytrans->address = addr;
+	// Check if the address is correct; send acknowledgement.
+  if (addr == SLAVE_ADDR) {
+    WAIT_FOR_RISING_SCL(s);
+    write_io(s, IO_SDA, 0);
+    mytrans->status = TRANS_SUCCESS;
+  } else {
+    mytrans->status = TRANS_ADDRESS_NACK;
+    return 1;
+	}
 
-	// get address
-
-	// update mytrans with address and readwrite flag
-
-	// check address and send acknowledgement
-	// set status in mytrans and return if address doess not match slave address
-
-	// get data
-	
+  WAIT_FOR_FALLING_SCL(s);
+  
+  /* Data Phase */
+	int data = 0;
+  for (int i = 7; i >= 0; --i) {
+    WAIT_FOR_RISING_SCL(s);
+    data |= (read_io(s, IO_SDA) << i);
+  }
 	// send acknowledgement
-
+  WAIT_FOR_RISING_SCL(s);
+  write_io(s, IO_SDA, 0);
+  mytrans->status = TRANS_SUCCESS;
 	// wait for stop bit
-
+  WAIT_FOR_STOP_BIT(s);
 	// update mytrans with data and status
+  mytrans->data = data;
+  mytrans->status = TRANS_SUCCESS;
 }
 
 /*
