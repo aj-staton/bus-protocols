@@ -1,4 +1,4 @@
-# Microcontrollers
+# Data Communications for Embedded Systems
 These are projects for CSCE 317, Computer Systems Engineering at the University of South Carolina, Columbia. The course is lab-based around embedded systems and thier communication protocols.
 
 During my time in this course, the unfortunate events of COVID-19 occured globally. This forced instruction to be moved online. 
