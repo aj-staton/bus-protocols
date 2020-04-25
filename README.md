@@ -20,7 +20,7 @@ This project is similar to the original SPI project. A bit-banged SPI transactio
 The goal was to read sensor data and write it to off-chip flash memory.
 
 ## I2C
-Another software-defined comunication representation in C, for I2C. This project was similar to that of [SPI (Multiple)](##SPI (Multiple)) where sensor data was read and sent to flash storage. 
+Another software-defined comunication representation, for I2C. This project was similar to that of [SPI (Multiple)](##SPI (Multiple)) where sensor data was read and sent to flash storage. 
 
 ### Credit
 This course was taught by Dr. Jason. D. Bakos in the Spring of 2020; the Teaching Assistants were Charles Daniels and Philip Conrad. Much of the material was provided by them. I was simply filling in some gaps around my given constraints.
