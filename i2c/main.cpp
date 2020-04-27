@@ -1,6 +1,7 @@
 /* Copyright 2020 Jason Bakos, Philip Conrad, Charles Daniels */
 
-/* Used and modified by Austin Staton for CSCE317, Project lab_virti2csingle
+/* Used and modified by Austin Staton for CSCE317
+ * Project `lab_virti2csingle`
  */
 
 #include "support.h"
@@ -116,13 +117,13 @@ int slave_i2c(simulation_state *s,I2C_TRANSACT *mytrans) {
     WAIT_FOR_RISING_SCL(s);
     data |= (read_io(s, IO_SDA) << i);
   }
-	// send acknowledgement
+	// Send the ACK
   WAIT_FOR_RISING_SCL(s);
   write_io(s, IO_SDA, 0);
   mytrans->status = TRANS_SUCCESS;
-	// wait for stop bit
+  // End transaction.
   WAIT_FOR_STOP_BIT(s);
-	// update mytrans with data and status
+	// Update data. 
   mytrans->data = data;
   mytrans->status = TRANS_SUCCESS;
 }
